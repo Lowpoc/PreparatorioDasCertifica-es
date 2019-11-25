@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +21,11 @@ namespace UseClassTask
 
             Console.WriteLine("\nSee below task with method continuewith:");
 
-            Task<int> task2 = Task.Run(() => {
+            Task<int> task2 = Task.Run(() =>
+            {
                 return 10;
-            }).ContinueWith((value) => {
+            }).ContinueWith((value) =>
+            {
                 Console.WriteLine("10 x 2 : {0}", value.Result * 2);
                 return 20;
             });
@@ -53,6 +56,35 @@ namespace UseClassTask
 
 
             completedTask.Wait();
+
+            Console.WriteLine("Using WaitAny..");
+            Task<int>[] tasks = new Task<int>[3];
+
+            tasks[0] = Task.Run(() => { Thread.Sleep(2000); return 1; });
+            tasks[1] = Task.Run(() => { Thread.Sleep(1000); return 2; });
+            tasks[2] = Task.Run(() => { Thread.Sleep(3000); return 3; });
+
+            while (tasks.Length > 0)
+            {
+                int i = Task.WaitAny(tasks);
+                Task<int> finshedTask = tasks[i];
+                Console.WriteLine(finshedTask.Result);
+                var temp = tasks.ToList();
+                temp.RemoveAt(i);
+                tasks = temp.ToArray();
+            }
+
+            tasks = new Task<int>[3];
+
+            tasks[0] = Task.Run(() => { Thread.Sleep(2000); return 1; });
+            tasks[1] = Task.Run(() => { Thread.Sleep(1000); return 2; });
+            tasks[2] = Task.Run(() => { Thread.Sleep(3000); return 3; });
+
+            Console.WriteLine("Using WaitAll..");
+            Task.WaitAll(tasks);
+
+            Console.WriteLine("Finshed all task :)");
+      
         }
     }
 }
